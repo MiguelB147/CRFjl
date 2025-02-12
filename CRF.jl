@@ -6,6 +6,9 @@ export SimData, LogLik, spline, Profile, AdaptiveProfile
 using Distributions
 using Random
 using Splines2
+using Distributed
+
+addprocs(6)
 
 IndGreater = function(x::Array)
     n = length(x)
@@ -205,7 +208,7 @@ AdaptiveProfile = function (datalist::NamedTuple, degree::Int; start::Vector, st
 
     println("Profiling...")
 
-    for i in 1:iter
+for i in 1:iter
 
         printstyled("Iteration ", i, "\n"; color = :blue)
         
