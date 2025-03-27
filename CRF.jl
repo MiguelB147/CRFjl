@@ -110,17 +110,6 @@ SimData = function(;K::Int, df::Int, degree::Int, ub = 0; alpha = 0.0023)
 
     X = hcat(X1,X2)
 
-    qq1 = quantile(X1[delta1 .== 1], collect(range(0,1,length=df-degree+2)))
-    knots1 = vcat(minimum(X1)-1, qq1[2:length(qq1)])
-
-    qq2 = quantile(X2[delta2 .== 1], collect(range(0,1,length=df-degree+2)))
-    knots2 = vcat(minimum(X2)-1, qq1[2:length(qq2)])  
-
-    if (ub > 0 && ub < 5)
-        knots1[length(knots1)] = maximum(X1)
-        knots2[length(knots2)] = maximum(X2)
-    end
-
     I1 = IndGreater(X1)
     I2 = IndLess(X2)
     I5 = IndEqual(X1)
@@ -159,17 +148,25 @@ LogLik = function (; riskset::Matrix, logtheta::Matrix, delta::Matrix, I1::Matri
     return -sum1-sum2;
 end
 
-spline = function(t1::Vector, t2::Vector, coef::Vector; degree::Int, knots::Matrix)
+spline = function(t::Vector; degree::Int, dim::Int)
 
-    df = size(knots,1)
-    coefmat = reshape(coef, df, df)
+    nk = dim - degree + 1
+    xl = minimum(t)
+    xu = maximum(t)
+    xl = xl-xr*0.001
+    xu = xu+xr*0.001
+    dx = (xu-xl)/(nk-1)
 
-    B1 = bs(t1, order = degree+1, knots = knots[:,1])
-    B2 = bs(t2, order = degree+1, knots = knots[:,2])
+    k = collect(range(xl-dx*degree, xl+dx*degree, length = nk+2*degree))
+    k.bs = k[(degree+1):(nk+degreee)]
 
-    tensor = B1 * coefmat * B2'
+    X = bs(t1, order = degree+1, knots = k.bs, intercept = true)
 
-    return tensor
+
+
+
+
+    return (X = X, S = S, )
 end
 
 polynomial = function(t1::Vector, t2::Vector, coef::Vector)
